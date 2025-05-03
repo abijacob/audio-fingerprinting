@@ -1,21 +1,3 @@
-#!/usr/bin/env python3
-"""
-main.py
-
-Build & query an audio-fingerprinting DB over AIFF/WAV files.
-
-Usage:
-  # 1) Build the DB from all .aiff/.wav in full-audiotracks:
-  python main.py build_db \
-    --music_folder audio-files/full-audiotracks \
-    --db_path fingerprints.pkl
-
-  # 2) Recognize a sample clip from test-samples:
-  python main.py recognize \
-    --query_path audio-files/test-samples/test-sample1.aif \
-    --db_path fingerprints.pkl
-"""
-
 import os
 import pickle
 from collections import defaultdict, Counter
@@ -23,7 +5,7 @@ from collections import defaultdict, Counter
 import numpy as np
 import librosa
 
-# —— Spectrogram & Peak Detection ——
+#Spectrogram & Peak Detection
 def compute_spectrogram(y, n_fft=4096, hop_length=512):
     return np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
 
@@ -39,9 +21,9 @@ def detect_peaks(S, amp_min=10):
                 peaks.append((t, f))
     return peaks
 
-# —— Hash Generation ——
+#Hash Generation
 def hash_function(f1, delta_f, dt):
-    # pack into 32-bit int
+    #pack into 32-bit int
     return (f1 & 0xFFFF) << 16 | (delta_f & 0xFF) << 8 | (dt & 0xFF)
 
 def generate_hashes(peaks, fan_value=5, max_dt=50):
@@ -60,7 +42,7 @@ def generate_hashes(peaks, fan_value=5, max_dt=50):
                 break
     return hashes
 
-# —— Database Construction ——
+#Database Construction
 def build_db(music_folder, db_path, amp_min=10, fan_value=5, max_dt=50):
     AUDIO_EXT = ('.wav', '.aif', '.aiff')
     db = defaultdict(list)
@@ -80,7 +62,7 @@ def build_db(music_folder, db_path, amp_min=10, fan_value=5, max_dt=50):
         pickle.dump(dict(db), f)
     print(f"Database built and saved to {db_path}")
 
-# —— Query Recognition ——
+#Query Recognition
 def recognize(query_path, db_path, amp_min=10, fan_value=5, max_dt=50):
     with open(db_path, 'rb') as f:
         db = pickle.load(f)
@@ -99,7 +81,7 @@ def recognize(query_path, db_path, amp_min=10, fan_value=5, max_dt=50):
     (best_song, _), best_count = votes.most_common(1)[0]
     return best_song, best_count / len(q_hashes)
 
-# —— CLI Entrypoint ——
+#CLI Entrypoint
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser()

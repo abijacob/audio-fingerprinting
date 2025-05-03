@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-runtime.py
-
-Measure fingerprint DB build time and recognition time.
-"""
 import time
 import argparse
 from main import build_db, recognize
